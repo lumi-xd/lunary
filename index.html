@@ -1158,11 +1158,11 @@
       if (name === null) return;
       displayName = name;
       
-      const pic = prompt('Profile pic URL:', profilePicUrl);
+      const pic = getDirectDriveLink(prompt('Profile pic URL:', profilePicUrl));
       if (pic === null) return;
       profilePicUrl = pic;
       
-      const bg = prompt('Background image URL:', bgImageUrl);
+      const bg = getDirectDriveLink(prompt('Background image URL:', bgImageUrl));
       if (bg === null) return;
       bgImageUrl = bg;
       
@@ -1200,12 +1200,10 @@
         localStorage.setItem(STORAGE_HASH_KEY, currentUserHash);
         localStorage.setItem(STORAGE_USER_KEY, currentUsername);
       }
-      // Always save profile to localStorage
       localStorage.setItem(STORAGE_PROFILE_KEY, JSON.stringify({ displayName, profilePicUrl, bgImageUrl }));
     }
 
     function loadLocal() {
-      // Load profile first (always available)
       const profileData = localStorage.getItem(STORAGE_PROFILE_KEY);
       if (profileData) {
         try {
