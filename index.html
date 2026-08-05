@@ -550,7 +550,7 @@
     const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
 
     if (match) {
-        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+        return `https://drive.usercontent.google.com/download?id=${match[1]}&export=view&authuser=0`;
     }
 
     return url;
@@ -824,7 +824,6 @@
       });
       grid.innerHTML = html;
 
-      // Event listeners
       document.querySelectorAll('.fs-btn').forEach(el => {
         el.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -1145,7 +1144,6 @@
       if (bgImageUrl && bgImageUrl.length > 10) {
         bgImage.style.backgroundImage = `url(${bgImageUrl})`;
       }
-      // Always save to localStorage
       localStorage.setItem(STORAGE_PROFILE_KEY, JSON.stringify({ displayName, profilePicUrl, bgImageUrl }));
     }
 
