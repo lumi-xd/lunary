@@ -8,6 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; }
     body {
@@ -51,14 +52,8 @@
       animation: sparkFade 0.8s ease-out forwards;
     }
     @keyframes sparkFade {
-      0% {
-        opacity: 1;
-        transform: translate(0, 0) scale(1);
-      }
-      100% {
-        opacity: 0;
-        transform: translate(var(--tx), var(--ty)) scale(0);
-      }
+      0% { opacity: 1; transform: translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
     }
     .container {
       max-width: 1400px;
@@ -70,7 +65,7 @@
       background: rgba(18, 25, 45, 0.5);
       -webkit-backdrop-filter: blur(16px);
       padding: 1.2rem 1.2rem;
-      margin: 1.2rem;
+      margin-bottom: 1.2rem;
       border: 1px solid rgba(255, 255, 255, 0.05);
       transition: all 0.3s ease;
     }
@@ -88,41 +83,46 @@
     .profile-section {
       display: flex;
       align-items: center;
-      gap: 1.2rem;
+      gap: 1.5rem;
       cursor: pointer;
       transition: transform 0.3s ease;
     }
     .profile-section:hover { transform: scale(1.02); }
     .profile-pic {
-      width: 72px;
-      height: 72px;
+      width: 96px;
+      height: 96px;
       border-radius: 50%;
-      border: 3px solid #5a6d9b;
+      border: 3px solid #8a9fd0;
       object-fit: cover;
       background: #1a2542;
       cursor: pointer;
       transition: all 0.3s;
-      box-shadow: 0 4px 20px rgba(90, 109, 155, 0.3);
+      box-shadow: 0 4px 30px rgba(138, 159, 208, 0.3);
     }
     .profile-pic:hover { 
-      border-color: #8a9fd0; 
+      border-color: #c4b8e0; 
       transform: scale(1.05);
-      box-shadow: 0 6px 30px rgba(138, 159, 208, 0.4);
+      box-shadow: 0 8px 40px rgba(196, 184, 224, 0.4);
     }
     .profile-name {
-      font-size: 1.4rem;
+      font-size: 2rem;
       font-weight: 400;
+      font-family: 'Playfair Display', 'Segoe UI', serif;
       color: #e7e9f0;
-      background: linear-gradient(135deg, #f7e9b0, #c4b8e0);
+      background: linear-gradient(135deg, #f7e9b0, #c4b8e0, #8a9fd0);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 40px rgba(247, 233, 176, 0.15);
     }
     .profile-name small { 
-      opacity: 0.3; 
+      opacity: 0.4; 
       font-size: 0.7rem; 
       display: block;
-      -webkit-text-fill-color: rgba(255,255,255,0.3);
+      -webkit-text-fill-color: rgba(255,255,255,0.4);
+      font-family: 'Segoe UI', sans-serif;
+      font-weight: 300;
+      letter-spacing: 2px;
     }
     h1 {
       font-size: 1.8rem;
@@ -450,19 +450,64 @@
       border: 1px solid #5b6b91;
       white-space: nowrap;
     }
+    .drop-zone {
+      border: 2px dashed rgba(138, 159, 208, 0.3);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      background: rgba(13, 19, 38, 0.3);
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: #8a9fd0;
+      background: rgba(13, 19, 38, 0.5);
+      transform: scale(1.02);
+    }
+    .drop-zone i {
+      font-size: 3rem;
+      color: #5a6d9b;
+      margin-bottom: 0.5rem;
+    }
+    .drop-zone p {
+      opacity: 0.6;
+      font-size: 0.9rem;
+    }
+    .upload-progress {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+    .upload-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #5a6d9b, #8a9fd0);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+    .hidden-input {
+      display: none !important;
+    }
     @media (max-width: 768px) {
       .img-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
       .input-group input, .input-group select { min-width: 70px; font-size: 0.75rem; }
       .card { padding: 0.8rem; }
       .profile-section { width: 100%; }
-      .profile-pic { width: 56px; height: 56px; }
-      .profile-name { font-size: 1.1rem; }
+      .profile-pic { width: 72px; height: 72px; }
+      .profile-name { font-size: 1.5rem; }
       .login-area { width: 100%; }
       .login-area input { flex: 1; min-width: 80px; }
       .fs-info { padding: 0.8rem 1rem; }
+      .drop-zone { padding: 1rem; }
+      .drop-zone i { font-size: 2rem; }
     }
     @media (max-width: 480px) {
       .img-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+      .profile-pic { width: 60px; height: 60px; }
+      .profile-name { font-size: 1.2rem; }
     }
   </style>
 </head>
@@ -480,8 +525,8 @@
         </div>
       </div>
       <div class="login-area" id="loginArea">
-        <input type="text" id="usernameInput" placeholder="username" value="admin">
-        <input type="password" id="passwordInput" placeholder="password" value="1234">
+        <input type="text" id="usernameInput" placeholder="username">
+        <input type="password" id="passwordInput" placeholder="password">
         <button class="btn btn-primary" id="loginBtn"><i class="fas fa-key"></i> login</button>
         <span id="loginStatus" style="font-size:0.75rem;color:#b0c4f0;">🔒</span>
       </div>
@@ -508,8 +553,19 @@
   </div>
 
   <div class="card">
+    <div class="drop-zone" id="dropZone">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <p><strong>Click to upload</strong> or drag & drop images</p>
+      <p style="font-size:0.7rem; opacity:0.4;">Supports JPG, PNG, GIF, WebP</p>
+      <div class="upload-progress" id="uploadProgress" style="display:none;">
+        <div class="upload-progress-bar" id="uploadProgressBar"></div>
+      </div>
+      <div id="uploadStatus" style="font-size:0.8rem; margin-top:0.5rem;"></div>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="input-group">
-      <input type="text" id="newSrc" placeholder="image url">
       <input type="text" id="newId" placeholder="id (optional)">
       <input type="text" id="newChapter" placeholder="chapter" list="chapterList">
       <datalist id="chapterList"></datalist>
@@ -546,26 +602,33 @@
 </div>
 
 <script>
-  function getDirectDriveLink(url) {
-    return url;
-  }
   (function(){
+    // ---------- FIREBASE CONFIG ----------
     const firebaseConfig = {
-    apiKey: "AIzaSyB_UAmL9fioe4zOkSzT1m-ghdzdzDH_bls",
-    authDomain: "imgs-eea1b.firebaseapp.com",
-    databaseURL: "https://imgs-eea1b-default-rtdb.firebaseio.com",
-    projectId: "imgs-eea1b",
-    storageBucket: "imgs-eea1b.firebasestorage.app",
-    messagingSenderId: "1074974889235",
-    appId: "1:1074974889235:web:10c4de60f249d9889df6e6",
-    measurementId: "G-MJ19XR54YZ"
-  };
+      apiKey: "AIzaSyB_UAmL9fioe4zOkSzT1m-ghdzdzDH_bls",
+      authDomain: "imgs-eea1b.firebaseapp.com",
+      databaseURL: "https://imgs-eea1b-default-rtdb.firebaseio.com",
+      projectId: "imgs-eea1b",
+      storageBucket: "imgs-eea1b.firebasestorage.app",
+      messagingSenderId: "1074974889235",
+      appId: "1:1074974889235:web:10c4de60f249d9889df6e6",
+      measurementId: "G-MJ19XR54YZ"
+    };
+    
     let firebaseApp, database;
     try {
       firebaseApp = firebase.initializeApp(firebaseConfig);
       database = firebase.database();
     } catch(e) { console.warn("Firebase init error", e); }
 
+    // ---------- CLOUDINARY CONFIG ----------
+    const CLOUDINARY_CONFIG = {
+      cloudName: 'vdmwjmya',
+      apiKey: '262234969351566',
+      uploadPreset: 'lunary_uploads'
+    };
+
+    // ---------- HASH FUNCTION ----------
     window.createHash = function(username, password) {
       const hash = CryptoJS.SHA512(username + ':' + password).toString(CryptoJS.enc.Hex);
       return 'hash_' + hash;
@@ -575,6 +638,43 @@
       return 'hash_' + CryptoJS.SHA512(username + ':' + password).toString(CryptoJS.enc.Hex);
     }
 
+    // ---------- CLOUDINARY UPLOAD ----------
+    function uploadToCloudinary(file, progressCallback) {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
+        formData.append('api_key', CLOUDINARY_CONFIG.apiKey);
+        
+        const xhr = new XMLHttpRequest();
+        const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/upload`;
+        xhr.open('POST', uploadUrl, true);
+        
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable && progressCallback) {
+            const progress = (e.loaded / e.total) * 100;
+            progressCallback(progress);
+          }
+        };
+        
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response.secure_url);
+          } else {
+            reject(new Error('Upload failed: ' + xhr.status + ' ' + xhr.statusText));
+          }
+        };
+        
+        xhr.onerror = () => {
+          reject(new Error('Network error - please check your Cloudinary config'));
+        };
+        
+        xhr.send(formData);
+      });
+    }
+
+    // ---------- SPARK EFFECTS ----------
     function createSparks(x, y) {
       const colors = ['#f7e9b0', '#c4b8e0', '#8a9fd0', '#58a086', '#dbb05c'];
       const container = document.createElement('div');
@@ -623,6 +723,7 @@
       }
     });
 
+    // ---------- STATE ----------
     let images = [];
     let selectedIds = new Set();
     let currentUserHash = null;
@@ -657,7 +758,9 @@
     const profilePic = document.getElementById('profilePic');
     const statusPanel = document.getElementById('statusPanel');
     const bgImage = document.getElementById('bgImage');
+    const dropZone = document.getElementById('dropZone');
 
+    // ---------- HELPERS ----------
     function generateId() { 
       return 'img_' + Date.now().toString(36) + Math.random().toString(36).slice(2,4);
     }
@@ -773,6 +876,16 @@
       document.getElementById('valueList').innerHTML = [...values].map(v => `<option value="${v}">`).join('');
     }
 
+    // ---------- UPLOAD TO CLOUD ONLY MANUALLY ----------
+    async function saveImageToCloud(img) {
+      if (!database || !currentUserHash) return;
+      const ref = database.ref('user_data/' + currentUserHash + '/images/' + img.id);
+      await ref.set(img);
+      cloudStatus[img.id] = localStatus[img.id] || 0;
+      await database.ref('user_data/' + currentUserHash + '/status').set(cloudStatus);
+    }
+
+    // ---------- RENDER ----------
     function render() {
       const filtered = getFiltered();
       totalBadge.textContent = images.length;
@@ -797,7 +910,7 @@
                 <button class="btn btn-sm fs-btn" data-id="${img.id}"><i class="fas fa-expand"></i></button>
                 <button class="btn btn-sm btn-primary edit-btn" data-id="${img.id}"><i class="fas fa-pen"></i></button>
                 <button class="btn btn-sm btn-danger delete-btn" data-id="${img.id}"><i class="fas fa-trash"></i></button>
-                ${!isCloud ? `<button class="btn btn-sm btn-warning upload-btn" data-id="${img.id}"><i class="fas fa-cloud-upload-alt"></i></button>` : ''}
+                ${!isCloud ? `<button class="btn btn-sm btn-warning upload-btn" data-id="${img.id}"><i class="fas fa-cloud-upload-alt"></i> upload</button>` : ''}
               </div>
             </div>
             <div class="img-meta">
@@ -885,7 +998,50 @@
           e.stopPropagation();
           const id = el.dataset.id;
           const img = images.find(i => i.id === id);
-          if (img) editImage(img);
+          if (img) {
+            const choice = prompt('Edit image:\n1 - Image file\n2 - Metadata (chapter, sub-source, etc.)', '1');
+            if (choice === '1') {
+              const fileInput = document.createElement('input');
+              fileInput.type = 'file';
+              fileInput.accept = 'image/*';
+              fileInput.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  try {
+                    const progressBar = document.getElementById('uploadProgressBar');
+                    const progressContainer = document.getElementById('uploadProgress');
+                    const statusText = document.getElementById('uploadStatus');
+                    
+                    progressContainer.style.display = 'block';
+                    
+                    const downloadURL = await uploadToCloudinary(file, (progress) => {
+                      progressBar.style.width = progress + '%';
+                      statusText.textContent = `Uploading: ${Math.round(progress)}%`;
+                    });
+                    
+                    img.src = downloadURL;
+                    updateStatus(id);
+                    saveLocal();
+                    render();
+                    if (statusPanelVisible) renderStatusPanel();
+                    
+                    statusText.textContent = '✅ Image updated locally!';
+                    setTimeout(() => {
+                      progressContainer.style.display = 'none';
+                      statusText.textContent = '';
+                      progressBar.style.width = '0%';
+                    }, 1500);
+                  } catch(err) {
+                    alert('Upload failed: ' + err.message);
+                  }
+                }
+                fileInput.remove();
+              };
+              fileInput.click();
+            } else if (choice === '2') {
+              editImageMetadata(img);
+            }
+          }
         });
       });
 
@@ -901,9 +1057,8 @@
       updateDatalists();
     }
 
-    function editImage(img) {
-      const newSrc = getDirectDriveLink(prompt('Image URL:', img.src));
-      if (newSrc === null) return;
+    // ---------- EDIT IMAGE METADATA ----------
+    async function editImageMetadata(img) {
       const newChapter = prompt('Chapter:', img.chapter);
       if (newChapter === null) return;
       const newSub = prompt('Sub-source:', img.subSource);
@@ -913,7 +1068,6 @@
       const newNote = prompt('Note:', img.note || '');
       if (newNote === null) return;
       
-      img.src = newSrc || img.src;
       img.chapter = newChapter || 'untitled';
       img.subSource = newSub || 'unknown';
       img.classes = parseClasses(newClasses);
@@ -945,6 +1099,7 @@
       if (e.target === e.currentTarget) document.getElementById('fullscreenOverlay').classList.remove('active');
     });
 
+    // ---------- STATUS PANEL ----------
     function renderStatusPanel() {
       const allIds = new Set([...Object.keys(localStatus), ...Object.keys(cloudStatus)]);
       if (allIds.size === 0) {
@@ -1003,15 +1158,13 @@
       document.getElementById('deleteAllBtn').addEventListener('click', deleteAllLocal);
     }
 
+    // ---------- SINGLE OPERATIONS ----------
     async function uploadSingle(id) {
       if (!database || !currentUserHash) { alert('Please login first'); return; }
-      const ref = database.ref('user_data/' + currentUserHash);
       const img = images.find(i => i.id === id);
       if (!img) { alert('Image not found'); return; }
       try {
-        await ref.child('images/' + id).set(img);
-        cloudStatus[id] = localStatus[id] || 0;
-        await ref.child('status').set(cloudStatus);
+        await saveImageToCloud(img);
         updateSyncStatus();
         if (statusPanelVisible) renderStatusPanel();
         alert('Uploaded to cloud');
@@ -1021,13 +1174,10 @@
 
     async function pushSingle(id) {
       if (!database || !currentUserHash) return;
-      const ref = database.ref('user_data/' + currentUserHash);
       const img = images.find(i => i.id === id);
       if (!img) { alert('Image not found'); return; }
       try {
-        await ref.child('images/' + id).set(img);
-        cloudStatus[id] = localStatus[id];
-        await ref.child('status').set(cloudStatus);
+        await saveImageToCloud(img);
         updateSyncStatus();
         if (statusPanelVisible) renderStatusPanel();
       } catch(e) { alert('Error: '+e.message); }
@@ -1128,17 +1278,80 @@
       if (statusPanelVisible) renderStatusPanel();
     }
 
+    // ---------- PROFILE & BG ----------
     function updateProfileUI() {
-      profileName.textContent = displayName;
+      profileName.innerHTML = displayName + '<small>✦ lunary</small>';
       if (profilePicUrl && profilePicUrl.length > 10) {
         profilePic.src = profilePicUrl;
       } else {
-        profilePic.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="72" height="72"%3E%3Crect fill="%231a2542" width="72" height="72"/%3E%3Ctext x="36" y="48" text-anchor="middle" fill="%235a6d9b" font-size="30"%3E👤%3C/text%3E%3C/svg%3E';
+        profilePic.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="96" height="96"%3E%3Crect fill="%231a2542" width="96" height="96"/%3E%3Ctext x="48" y="60" text-anchor="middle" fill="%238a9fd0" font-size="40"%3E🌙%3C/text%3E%3C/svg%3E';
       }
       if (bgImageUrl && bgImageUrl.length > 10) {
         bgImage.style.backgroundImage = `url(${bgImageUrl})`;
       }
       localStorage.setItem(STORAGE_PROFILE_KEY, JSON.stringify({ displayName, profilePicUrl, bgImageUrl }));
+    }
+
+    async function uploadProfilePic(file) {
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressContainer = document.getElementById('uploadProgress');
+      const statusText = document.getElementById('uploadStatus');
+      
+      progressContainer.style.display = 'block';
+      
+      try {
+        const downloadURL = await uploadToCloudinary(file, (progress) => {
+          progressBar.style.width = progress + '%';
+          statusText.textContent = `Uploading: ${Math.round(progress)}%`;
+        });
+        
+        profilePicUrl = downloadURL;
+        updateProfileUI();
+        saveLocal();
+        
+        statusText.textContent = '✅ Profile updated locally!';
+        setTimeout(() => {
+          progressContainer.style.display = 'none';
+          statusText.textContent = '';
+          progressBar.style.width = '0%';
+        }, 1500);
+        
+        return downloadURL;
+      } catch(e) {
+        statusText.textContent = '❌ Upload failed';
+        throw e;
+      }
+    }
+
+    async function uploadBgImage(file) {
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressContainer = document.getElementById('uploadProgress');
+      const statusText = document.getElementById('uploadStatus');
+      
+      progressContainer.style.display = 'block';
+      
+      try {
+        const downloadURL = await uploadToCloudinary(file, (progress) => {
+          progressBar.style.width = progress + '%';
+          statusText.textContent = `Uploading: ${Math.round(progress)}%`;
+        });
+        
+        bgImageUrl = downloadURL;
+        updateProfileUI();
+        saveLocal();
+        
+        statusText.textContent = '✅ Background updated locally!';
+        setTimeout(() => {
+          progressContainer.style.display = 'none';
+          statusText.textContent = '';
+          progressBar.style.width = '0%';
+        }, 1500);
+        
+        return downloadURL;
+      } catch(e) {
+        statusText.textContent = '❌ Upload failed';
+        throw e;
+      }
     }
 
     async function uploadProfile() {
@@ -1150,19 +1363,58 @@
       if (name === null) return;
       displayName = name;
       
-      const pic = getDirectDriveLink(prompt('Profile pic URL:', profilePicUrl));
-      if (pic === null) return;
-      profilePicUrl = pic;
-      
-      const bg = getDirectDriveLink(prompt('Background image URL:', bgImageUrl));
-      if (bg === null) return;
-      bgImageUrl = bg;
-      
-      try {
-        await ref.child('profile').set({ displayName, profilePicUrl, bgImageUrl });
-        updateProfileUI();
-        alert('Profile uploaded to cloud');
-      } catch(e) { alert('Error: '+e.message); }
+      // Profile pic upload
+      if (confirm('Upload new profile picture?')) {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = async (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            try {
+              await uploadProfilePic(file);
+              fileInput.remove();
+              // After profile pic, ask for background
+              if (confirm('Upload new background image?')) {
+                const bgInput = document.createElement('input');
+                bgInput.type = 'file';
+                bgInput.accept = 'image/*';
+                bgInput.onchange = async (ev) => {
+                  const bgFile = ev.target.files[0];
+                  if (bgFile) {
+                    try {
+                      await uploadBgImage(bgFile);
+                      bgInput.remove();
+                      // Save both to Firebase
+                      await ref.child('profile').set({ displayName, profilePicUrl, bgImageUrl });
+                      alert('Profile and background uploaded to cloud!');
+                    } catch(err) {
+                      alert('Background upload failed: ' + err.message);
+                      bgInput.remove();
+                    }
+                  }
+                };
+                bgInput.click();
+              } else {
+                // Save just profile
+                await ref.child('profile').set({ displayName, profilePicUrl, bgImageUrl });
+                alert('Profile uploaded to cloud!');
+              }
+            } catch(err) {
+              alert('Upload failed: ' + err.message);
+              fileInput.remove();
+            }
+          }
+        };
+        fileInput.click();
+      } else {
+        // Just save name
+        try {
+          await ref.child('profile').set({ displayName, profilePicUrl, bgImageUrl });
+          updateProfileUI();
+          alert('Profile name saved to cloud');
+        } catch(e) { alert('Error: '+e.message); }
+      }
     }
 
     async function loadProfile() {
@@ -1185,6 +1437,101 @@
       } catch(e) { alert('Error: '+e.message); }
     }
 
+    // ---------- DRAG AND DROP ----------
+    dropZone.addEventListener('click', () => {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.multiple = true;
+      fileInput.onchange = (e) => {
+        if (e.target.files.length > 0) {
+          handleFiles(e.target.files);
+        }
+        fileInput.remove();
+      };
+      fileInput.click();
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFiles(files);
+      }
+    });
+
+    async function handleFiles(files) {
+      if (!currentUserHash) {
+        alert('Please login first');
+        return;
+      }
+
+      const chapter = document.getElementById('newChapter').value.trim() || 'untitled';
+      const sub = document.getElementById('newSub').value.trim() || 'unknown';
+      const cls = document.getElementById('newClass').value.trim();
+      const val = document.getElementById('newValue').value.trim();
+      
+      let classes = [];
+      if (cls && val) {
+        classes = [`${cls}:${val}`];
+      } else if (cls && !val) {
+        classes = [cls];
+      }
+
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const file of files) {
+        if (!file.type.startsWith('image/')) {
+          alert(`${file.name} is not an image file`);
+          failCount++;
+          continue;
+        }
+
+        const id = generateId();
+        
+        try {
+          const downloadURL = await uploadToCloudinary(file, (progress) => {
+            // Progress shown in drop zone
+          });
+          
+          const img = {
+            id: id,
+            src: downloadURL,
+            chapter: chapter,
+            subSource: sub,
+            classes: classes,
+            note: ''
+          };
+          
+          images.push(img);
+          updateStatus(img.id);
+          // SAVE LOCALLY ONLY - NOT TO CLOUD
+          saveLocal();
+          successCount++;
+        } catch(e) {
+          console.error('Upload failed:', e);
+          failCount++;
+        }
+      }
+
+      render();
+      if (statusPanelVisible) renderStatusPanel();
+      
+      alert(`Upload complete! (Local only)\n✅ Success: ${successCount}\n❌ Failed: ${failCount}\n\nClick "upload" button on images to send to cloud.`);
+    }
+
+    // ---------- LOCAL STORAGE ----------
     function saveLocal() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
       localStorage.setItem(STORAGE_STATUS_KEY, JSON.stringify(localStatus));
@@ -1244,7 +1591,6 @@
         isLoggedIn = true;
         loginStatus.textContent = '✅';
         showLoggedIn();
-        // Load cloud status in background
         if (database) {
           loadCloudStatus();
         }
@@ -1285,6 +1631,7 @@
       return database.ref('user_data/' + currentUserHash);
     }
 
+    // ---------- CLOUD OPERATIONS ----------
     async function pullFromCloud() {
       if (!database) { alert('Firebase not configured'); return; }
       if (!currentUserHash) { alert('Please login first'); return; }
@@ -1387,6 +1734,7 @@
       }
     }
 
+    // ---------- LOGIN ----------
     async function login(username, password) {
       const hashKey = secureHash(username, password);
       
@@ -1466,6 +1814,7 @@
       statusPanelVisible = false;
     }
 
+    // ---------- INIT ----------
     loadLocal();
     render();
 
@@ -1488,47 +1837,17 @@
     document.getElementById('logoutBtn').addEventListener('click', logout);
 
     document.getElementById('addImageBtn').addEventListener('click', () => {
-      const src = getDirectDriveLink(document.getElementById('newSrc').value.trim());
-      const customId = document.getElementById('newId').value.trim();
-      const chapter = document.getElementById('newChapter').value.trim() || 'untitled';
-      const sub = document.getElementById('newSub').value.trim() || 'unknown';
-      const cls = document.getElementById('newClass').value.trim();
-      const val = document.getElementById('newValue').value.trim();
-      
-      if (!src) { alert('Image src required'); return; }
-      
-      let classes = [];
-      if (cls && val) {
-        classes = [`${cls}:${val}`];
-      } else if (cls && !val) {
-        classes = [cls];
-      }
-      
-      const id = customId || generateId();
-      if (images.some(i => i.id === id)) {
-        alert('Image ID already exists. Please use a unique ID.');
-        return;
-      }
-      
-      const img = {
-        id: id,
-        src: src,
-        chapter: chapter,
-        subSource: sub,
-        classes: classes,
-        note: ''
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.multiple = true;
+      fileInput.onchange = (e) => {
+        if (e.target.files.length > 0) {
+          handleFiles(e.target.files);
+        }
+        fileInput.remove();
       };
-      images.push(img);
-      updateStatus(img.id);
-      saveLocal();
-      render();
-      if (statusPanelVisible) renderStatusPanel();
-      document.getElementById('newSrc').value = '';
-      document.getElementById('newId').value = '';
-      document.getElementById('newChapter').value = '';
-      document.getElementById('newSub').value = '';
-      document.getElementById('newClass').value = '';
-      document.getElementById('newValue').value = '';
+      fileInput.click();
     });
 
     document.getElementById('clearFiltersBtn').addEventListener('click', () => {
@@ -1556,6 +1875,48 @@
 
     document.getElementById('passwordInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') document.getElementById('loginBtn').click();
+    });
+
+    // Click on profile pic to change it
+    profilePic.addEventListener('click', () => {
+      if (!isLoggedIn) {
+        alert('Please login first');
+        return;
+      }
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          try {
+            await uploadProfilePic(file);
+            // Ask for background after profile pic
+            if (confirm('Also upload a background image?')) {
+              const bgInput = document.createElement('input');
+              bgInput.type = 'file';
+              bgInput.accept = 'image/*';
+              bgInput.onchange = async (ev) => {
+                const bgFile = ev.target.files[0];
+                if (bgFile) {
+                  try {
+                    await uploadBgImage(bgFile);
+                    bgInput.remove();
+                  } catch(err) {
+                    alert('Background upload failed: ' + err.message);
+                    bgInput.remove();
+                  }
+                }
+              };
+              bgInput.click();
+            }
+          } catch(err) {
+            alert('Upload failed: ' + err.message);
+          }
+        }
+        fileInput.remove();
+      };
+      fileInput.click();
     });
 
     if (isLoggedIn) {
