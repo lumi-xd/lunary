@@ -547,12 +547,6 @@
 
 <script>
   function getDirectDriveLink(url) {
-    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-
-    if (match) {
-        return `https://drive.usercontent.google.com/download?id=${match[1]}&export=view&authuser=0`;
-    }
-
     return url;
   }
   (function(){
