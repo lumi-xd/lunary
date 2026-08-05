@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>🌙 Lunary · Image Vault</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; }
+    body {
+      background: radial-gradient(circle at 20% 20%, #0b0e1a, #03050c);
+      min-height: 100vh;
+      padding: 1.2rem 1rem 3rem;
+      color: #e7e9f0;
+      cursor: default;
+      overflow-x: hidden;
+    }
+    .bg-image {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: 0;
+      pointer-events: none;
+      transition: background-image 0.8s ease;
+    }
+    .moon-glow {
+      position: fixed;
+      top: -30px;
+      right: -30px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255, 245, 200, 0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .spark-container {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    .spark {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: sparkFade 0.8s ease-out forwards;
+    }
+    @keyframes sparkFade {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(0);
+      }
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+    .card {
+      background: rgba(18, 25, 45, 0.5);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 1.2rem 1.2rem;
+      margin: 1.2rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+    .card:hover { 
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .profile-section {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .profile-section:hover { transform: scale(1.02); }
+    .profile-pic {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 3px solid #5a6d9b;
+      object-fit: cover;
+      background: #1a2542;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(90, 109, 155, 0.3);
+    }
+    .profile-pic:hover { 
+      border-color: #8a9fd0; 
+      transform: scale(1.05);
+      box-shadow: 0 6px 30px rgba(138, 159, 208, 0.4);
+    }
+    .profile-name {
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: #e7e9f0;
+      background: linear-gradient(135deg, #f7e9b0, #c4b8e0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
+    }
+    .profile-name small { 
+      opacity: 0.3; 
+      font-size: 0.7rem; 
+      display: block;
+      -webkit-text-fill-color: rgba(255,255,255,0.3);
+    }
+    h1 {
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 300;
+      background: linear-gradient(135deg, #f7e9b0, #c4b8e0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    h1 i { -webkit-text-fill-color: initial; color: #f7e9b0; }
+    .login-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .login-area input {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid #3a4466;
+      border-radius: 40px;
+      padding: 0.4rem 1rem;
+      color: white;
+      width: 110px;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+    .login-area input:focus {
+      border-color: #8a9fd0;
+      outline: none;
+      box-shadow: 0 0 20px rgba(138, 159, 208, 0.15);
+    }
+    .login-area input::placeholder { color: #8b95b5; }
+    .btn {
+      background: rgba(40, 55, 90, 0.7);
+      border: 1px solid #4f5d7e;
+      border-radius: 40px;
+      padding: 0.35rem 1rem;
+      color: white;
+      font-weight: 500;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(4px);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    }
+    .btn:active { transform: scale(0.95); }
+    .btn-primary { background: #5a6d9b; border-color: #8a9fd0; }
+    .btn-primary:hover { background: #6a7dab; }
+    .btn-success { background: #3a6b5c; border-color: #58a086; }
+    .btn-success:hover { background: #4a7b6c; }
+    .btn-danger { background: #8f4a5c; border-color: #c47a8e; }
+    .btn-danger:hover { background: #9f5a6c; }
+    .btn-warning { background: #9e7a3a; border-color: #dbb05c; }
+    .btn-warning:hover { background: #ae8a4a; }
+    .btn-info { background: #3a5f7a; border-color: #6a8faa; }
+    .btn-info:hover { background: #4a6f8a; }
+    .btn-sm { padding: 0.2rem 0.7rem; font-size: 0.7rem; }
+    .filter-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .filter-grid select, .filter-grid input {
+      background: rgba(13, 19, 38, 0.5);
+      border: 1px solid #36405e;
+      border-radius: 40px;
+      padding: 0.25rem 1rem;
+      color: #eef2ff;
+      font-size: 0.85rem;
+      min-width: 110px;
+      transition: all 0.3s;
+    }
+    .filter-grid select option { background: #141c33; }
+    .filter-grid input:focus, .filter-grid select:focus {
+      border-color: #8a9fd0;
+      outline: none;
+      box-shadow: 0 0 20px rgba(138, 159, 208, 0.1);
+    }
+    .img-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.8rem;
+    }
+    .img-item {
+      background: rgba(10, 16, 32, 0.4);
+      border-radius: 14px;
+      padding: 0.5rem;
+      border: 1px solid #2c3755;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      backdrop-filter: blur(4px);
+    }
+    .img-item:hover {
+      border-color: #6a7ea8;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+    .img-item.selected { border-color: #58a086; box-shadow: 0 0 20px rgba(88, 160, 134, 0.2); }
+    .img-wrapper {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #070b16;
+      aspect-ratio: 4/3;
+    }
+    .img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+    .img-wrapper:hover img { transform: scale(1.05); }
+    .img-actions {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .img-actions .btn {
+      padding: 0.1rem 0.5rem;
+      font-size: 0.55rem;
+      background: rgba(0,0,0,0.8);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .img-actions .btn:hover { background: rgba(40, 55, 90, 0.9); }
+    .img-meta {
+      padding: 0.3rem 0.1rem 0.1rem;
+      font-size: 0.7rem;
+    }
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.2rem 0.4rem;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+    .meta-tag {
+      background: rgba(26, 37, 66, 0.6);
+      padding: 0.05rem 0.5rem;
+      border-radius: 20px;
+      border-left: 2px solid #7b8fc7;
+      font-size: 0.6rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .meta-class {
+      background: rgba(30, 45, 71, 0.6);
+      padding: 0.05rem 0.5rem;
+      border-radius: 20px;
+      color: #bfd0f0;
+      font-size: 0.55rem;
+      border: 1px solid #4b5e82;
+    }
+    .note-input {
+      width: 100%;
+      background: rgba(13, 19, 38, 0.5);
+      border: 1px solid #36487a;
+      border-radius: 20px;
+      padding: 0.15rem 0.6rem;
+      color: #dce3fc;
+      font-size: 0.7rem;
+      margin: 3px 0;
+      transition: all 0.3s;
+    }
+    .note-input:focus {
+      border-color: #8a9fd0;
+      outline: none;
+      box-shadow: 0 0 20px rgba(138, 159, 208, 0.1);
+    }
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      width: 100%;
+    }
+    .input-group input, .input-group select {
+      flex: 1;
+      min-width: 90px;
+      background: rgba(13, 19, 38, 0.5);
+      border: 1px solid #36405e;
+      border-radius: 40px;
+      padding: 0.35rem 1rem;
+      color: white;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+    }
+    .input-group input:focus, .input-group select:focus {
+      border-color: #8a9fd0;
+      outline: none;
+      box-shadow: 0 0 20px rgba(138, 159, 208, 0.1);
+    }
+    .input-group select option { background: #141c33; }
+    .cloud-sync-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .status-panel {
+      max-height: 500px;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+    }
+    .status-panel table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+    .status-panel th {
+      text-align: left;
+      padding: 0.3rem 0.5rem;
+      background: rgba(26, 37, 66, 0.4);
+      border-bottom: 1px solid #3a4466;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .status-panel td {
+      padding: 0.25rem 0.5rem;
+      border-bottom: 1px solid rgba(58, 68, 102, 0.2);
+    }
+    .status-panel tr:hover { background: rgba(58, 68, 102, 0.15); }
+    .status-panel .btn { padding: 0.1rem 0.5rem; font-size: 0.6rem; }
+    .status-panel .thumb {
+      width: 40px;
+      height: 30px;
+      object-fit: cover;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid #3a4466;
+    }
+    .status-panel .thumb:hover { border-color: #8a9fd0; }
+    .fullscreen-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(20px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      flex-direction: column;
+      padding: 2rem;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .fullscreen-overlay.active { display: flex; }
+    .fullscreen-overlay .close-fs {
+      position: absolute;
+      top: 20px; right: 30px;
+      font-size: 2.5rem;
+      color: #bcc9f0;
+      cursor: pointer;
+      transition: all 0.3s;
+      z-index: 10;
+    }
+    .fullscreen-overlay .close-fs:hover { transform: rotate(90deg); color: white; }
+    .fs-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 90%;
+      max-height: 90%;
+      gap: 1rem;
+    }
+    .fs-content img {
+      max-width: 100%;
+      max-height: 70vh;
+      object-fit: contain;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px black;
+    }
+    .fs-info {
+      background: rgba(0,0,0,0.5);
+      padding: 1rem 2rem;
+      border-radius: 16px;
+      max-width: 700px;
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .fs-info .title { font-size: 1.2rem; font-weight: 500; margin-bottom: 0.3rem; }
+    .fs-info .sub { opacity: 0.7; font-size: 0.9rem; }
+    .fs-info .classes { display: flex; flex-wrap: wrap; gap: 0.3rem; justify-content: center; margin: 0.3rem 0; }
+    .fs-info .classes span {
+      background: rgba(30, 45, 71, 0.8);
+      padding: 0.1rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      border: 1px solid #4b5e82;
+    }
+    .fs-info .note { opacity: 0.8; font-size: 0.9rem; margin-top: 0.3rem; }
+    .fs-info .id { opacity: 0.3; font-size: 0.65rem; margin-top: 0.3rem; }
+    .login-hidden { display: none !important; }
+    .sync-status {
+      background: rgba(42, 52, 87, 0.6);
+      padding: 0.1rem 0.8rem;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      border: 1px solid #5b6b91;
+      white-space: nowrap;
+    }
+    @media (max-width: 768px) {
+      .img-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+      .input-group input, .input-group select { min-width: 70px; font-size: 0.75rem; }
+      .card { padding: 0.8rem; }
+      .profile-section { width: 100%; }
+      .profile-pic { width: 56px; height: 56px; }
+      .profile-name { font-size: 1.1rem; }
+      .login-area { width: 100%; }
+      .login-area input { flex: 1; min-width: 80px; }
+      .fs-info { padding: 0.8rem 1rem; }
+    }
+    @media (max-width: 480px) {
+      .img-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-image" id="bgImage"></div>
+<div class="moon-glow"></div>
+<div class="container" id="app">
+
+  <div class="card" id="loginCard">
+    <div class="card-header">
+      <div class="profile-section" id="profileSection">
+        <img class="profile-pic" id="profilePic" src="" alt="profile">
+        <div>
+          <div class="profile-name" id="profileName">Guest</div>
+        </div>
+      </div>
+      <div class="login-area" id="loginArea">
+        <input type="text" id="usernameInput" placeholder="username" value="admin">
+        <input type="password" id="passwordInput" placeholder="password" value="1234">
+        <button class="btn btn-primary" id="loginBtn"><i class="fas fa-key"></i> login</button>
+        <span id="loginStatus" style="font-size:0.75rem;color:#b0c4f0;">🔒</span>
+      </div>
+      <div class="login-area login-hidden" id="loggedInArea">
+        <button class="btn btn-sm" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> logout</button>
+        <span class="sync-status" id="syncStatus">✅ synced</span>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+      <span class="sync-status">📸 <span id="totalImagesBadge">0</span></span>
+      <span class="sync-status">🔍 <span id="filteredBadge">0</span></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="filter-grid">
+      <select id="filterChapterSelect"><option value="">chapter...</option></select>
+      <select id="filterSubSelect"><option value="">sub-source...</option></select>
+      <select id="filterClassSelect"><option value="">class...</option></select>
+      <select id="filterValueSelect"><option value="">value...</option></select>
+      <button class="btn btn-sm" id="clearFiltersBtn"><i class="fas fa-undo-alt"></i> clear</button>
+      <span class="sync-status" id="filterCount">0</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="input-group">
+      <input type="text" id="newSrc" placeholder="image url">
+      <input type="text" id="newId" placeholder="id (optional)">
+      <input type="text" id="newChapter" placeholder="chapter" list="chapterList">
+      <datalist id="chapterList"></datalist>
+      <input type="text" id="newSub" placeholder="sub-source" list="subList">
+      <datalist id="subList"></datalist>
+      <input type="text" id="newClass" placeholder="class" list="classList">
+      <datalist id="classList"></datalist>
+      <input type="text" id="newValue" placeholder="value" list="valueList">
+      <datalist id="valueList"></datalist>
+      <button class="btn btn-success" id="addImageBtn"><i class="fas fa-plus-circle"></i> add</button>
+    </div>
+  </div>
+
+  <div id="imageGrid" class="img-grid"></div>
+
+  <div class="card">
+    <div class="cloud-sync-bar">
+      <button class="btn btn-primary" id="pullCloudBtn"><i class="fas fa-cloud-download-alt"></i> pull images</button>
+      <button class="btn btn-warning" id="pushCloudBtn"><i class="fas fa-cloud-upload-alt"></i> push images</button>
+      <button class="btn btn-info" id="viewStatusBtn"><i class="fas fa-list"></i> view status</button>
+      <button class="btn" id="uploadProfileBtn"><i class="fas fa-user-upload"></i> upload profile</button>
+      <button class="btn" id="loadProfileBtn"><i class="fas fa-user-download"></i> load profile</button>
+    </div>
+    <div id="statusPanel" class="status-panel" style="display:none;"></div>
+  </div>
+
+  <div class="fullscreen-overlay" id="fullscreenOverlay">
+    <span class="close-fs" id="closeFsBtn">&times;</span>
+    <div class="fs-content">
+      <img id="fullscreenImg" src="" alt="fullscreen">
+      <div class="fs-info" id="fullscreenInfo"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const firebaseConfig = {
+    apiKey: "AIzaSyB_UAmL9fioe4zOkSzT1m-ghdzdzDH_bls",
+    authDomain: "imgs-eea1b.firebaseapp.com",
+    databaseURL: "https://imgs-eea1b-default-rtdb.firebaseio.com",
+    projectId: "imgs-eea1b",
+    storageBucket: "imgs-eea1b.firebasestorage.app",
+    messagingSenderId: "1074974889235",
+    appId: "1:1074974889235:web:10c4de60f249d9889df6e6",
+    measurementId: "G-MJ19XR54YZ"
+  };
+    let firebaseApp, database;
+    try {
+      firebaseApp = firebase.initializeApp(firebaseConfig);
+      database = firebase.database();
+    } catch(e) { console.warn("Firebase init error", e); }
+
+    window.createHash = function(username, password) {
+      const hash = CryptoJS.SHA512(username + ':' + password).toString(CryptoJS.enc.Hex);
+      return 'hash_' + hash;
+    };
+
+    function secureHash(username, password) {
+      return 'hash_' + CryptoJS.SHA512(username + ':' + password).toString(CryptoJS.enc.Hex);
+    }
+
+    function createSparks(x, y) {
+      const colors = ['#f7e9b0', '#c4b8e0', '#8a9fd0', '#58a086', '#dbb05c'];
+      const container = document.createElement('div');
+      container.className = 'spark-container';
+      container.style.left = x + 'px';
+      container.style.top = y + 'px';
+      
+      for (let i = 0; i < 20; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark';
+        const size = Math.random() * 4 + 2;
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * 80 + 20;
+        spark.style.width = size + 'px';
+        spark.style.height = size + 'px';
+        spark.style.background = colors[Math.floor(Math.random() * colors.length)];
+        spark.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
+        spark.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
+        spark.style.animationDelay = Math.random() * 0.1 + 's';
+        container.appendChild(spark);
+      }
+      
+      document.body.appendChild(container);
+      setTimeout(() => container.remove(), 1000);
+    }
+
+    let sparkTimeout;
+    document.addEventListener('mousemove', (e) => {
+      if (sparkTimeout) return;
+      sparkTimeout = setTimeout(() => {
+        if (Math.random() > 0.3) {
+          createSparks(e.clientX, e.clientY);
+        }
+        sparkTimeout = null;
+      }, 80);
+    });
+
+    document.addEventListener('click', (e) => {
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          createSparks(
+            e.clientX + (Math.random() - 0.5) * 40,
+            e.clientY + (Math.random() - 0.5) * 40
+          );
+        }, i * 50);
+      }
+    });
+
+    let images = [];
+    let selectedIds = new Set();
+    let currentUserHash = null;
+    let currentUsername = '';
+    let displayName = 'Guest';
+    let profilePicUrl = '';
+    let bgImageUrl = '';
+    let localStatus = {};
+    let cloudStatus = {};
+    let isLoggedIn = false;
+    let statusPanelVisible = false;
+
+    const STORAGE_KEY = 'lunary_images';
+    const STORAGE_STATUS_KEY = 'lunary_status';
+    const STORAGE_HASH_KEY = 'lunary_hash';
+    const STORAGE_USER_KEY = 'lunary_user';
+    const STORAGE_PROFILE_KEY = 'lunary_profile';
+
+    const grid = document.getElementById('imageGrid');
+    const filterChapter = document.getElementById('filterChapterSelect');
+    const filterSub = document.getElementById('filterSubSelect');
+    const filterClass = document.getElementById('filterClassSelect');
+    const filterValue = document.getElementById('filterValueSelect');
+    const filterCount = document.getElementById('filterCount');
+    const totalBadge = document.getElementById('totalImagesBadge');
+    const filteredBadge = document.getElementById('filteredBadge');
+    const loginStatus = document.getElementById('loginStatus');
+    const syncStatus = document.getElementById('syncStatus');
+    const loginArea = document.getElementById('loginArea');
+    const loggedInArea = document.getElementById('loggedInArea');
+    const profileName = document.getElementById('profileName');
+    const profilePic = document.getElementById('profilePic');
+    const statusPanel = document.getElementById('statusPanel');
+    const bgImage = document.getElementById('bgImage');
+
+    function generateId() { 
+      return 'img_' + Date.now().toString(36) + Math.random().toString(36).slice(2,4);
+    }
+    function parseClasses(str) {
+      if (!str.trim()) return [];
+      return str.split(',').map(s => s.trim()).filter(s => s.includes(':'));
+    }
+    function classesToString(arr) { return arr.join(', '); }
+    function getClassValues(arr) {
+      const result = {};
+      arr.forEach(cls => {
+        const [key, val] = cls.split(':');
+        if (key && val) {
+          if (!result[key]) result[key] = new Set();
+          result[key].add(val);
+        }
+      });
+      return result;
+    }
+
+    function updateStatus(id) {
+      localStatus[id] = (localStatus[id] || 0) + 1;
+      saveLocal();
+      updateSyncStatus();
+    }
+
+    function updateSyncStatus() {
+      const localKeys = Object.keys(localStatus).sort();
+      const cloudKeys = Object.keys(cloudStatus).sort();
+      if (localKeys.length === 0 && cloudKeys.length === 0) {
+        syncStatus.textContent = '🔄 empty';
+        return;
+      }
+      if (localKeys.length === cloudKeys.length && localKeys.every(k => localStatus[k] === cloudStatus[k])) {
+        syncStatus.textContent = '✅ synced';
+      } else {
+        syncStatus.textContent = '⚠️ pending';
+      }
+    }
+
+    function getFiltered() {
+      const ch = filterChapter.value;
+      const sub = filterSub.value;
+      const cls = filterClass.value;
+      const val = filterValue.value;
+      
+      return images.filter(img => {
+        if (ch && img.chapter !== ch) return false;
+        if (sub && img.subSource !== sub) return false;
+        if (cls || val) {
+          const classObj = getClassValues(img.classes);
+          if (cls && !classObj[cls]) return false;
+          if (val && !Object.values(classObj).some(v => v.has(val))) return false;
+          if (cls && val && !classObj[cls]?.has(val)) return false;
+        }
+        return true;
+      });
+    }
+
+    function updateFilters() {
+      const chapters = [...new Set(images.map(i => i.chapter))].filter(Boolean).sort();
+      const subs = [...new Set(images.map(i => i.subSource))].filter(Boolean).sort();
+      const classMap = {};
+      images.forEach(img => {
+        img.classes.forEach(cls => {
+          const [key, val] = cls.split(':');
+          if (key && val) {
+            if (!classMap[key]) classMap[key] = new Set();
+            classMap[key].add(val);
+          }
+        });
+      });
+      
+      const currentCh = filterChapter.value;
+      const currentSub = filterSub.value;
+      const currentCls = filterClass.value;
+      const currentVal = filterValue.value;
+      
+      filterChapter.innerHTML = '<option value="">chapter...</option>' + chapters.map(c => `<option value="${c}">${c}</option>`).join('');
+      filterSub.innerHTML = '<option value="">sub-source...</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
+      
+      const classKeys = Object.keys(classMap).sort();
+      filterClass.innerHTML = '<option value="">class...</option>' + classKeys.map(k => `<option value="${k}">${k}</option>`).join('');
+      
+      const values = new Set();
+      Object.values(classMap).forEach(v => v.forEach(val => values.add(val)));
+      filterValue.innerHTML = '<option value="">value...</option>' + [...values].sort().map(v => `<option value="${v}">${v}</option>`).join('');
+      
+      filterChapter.value = currentCh;
+      filterSub.value = currentSub;
+      filterClass.value = currentCls;
+      filterValue.value = currentVal;
+    }
+
+    function updateDatalists() {
+      const chapters = [...new Set(images.map(i => i.chapter))].filter(Boolean);
+      const subs = [...new Set(images.map(i => i.subSource))].filter(Boolean);
+      const classes = new Set();
+      const values = new Set();
+      images.forEach(img => {
+        img.classes.forEach(cls => {
+          const [key, val] = cls.split(':');
+          if (key && val) {
+            classes.add(key);
+            values.add(val);
+          }
+        });
+      });
+      
+      document.getElementById('chapterList').innerHTML = chapters.map(c => `<option value="${c}">`).join('');
+      document.getElementById('subList').innerHTML = subs.map(s => `<option value="${s}">`).join('');
+      document.getElementById('classList').innerHTML = [...classes].map(c => `<option value="${c}">`).join('');
+      document.getElementById('valueList').innerHTML = [...values].map(v => `<option value="${v}">`).join('');
+    }
+
+    function render() {
+      const filtered = getFiltered();
+      totalBadge.textContent = images.length;
+      filteredBadge.textContent = filtered.length;
+      filterCount.textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="padding:2rem; text-align:center; opacity:0.3; grid-column:1/-1;"><i class="fas fa-image" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>no images</div>`;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(img => {
+        const isSelected = selectedIds.has(img.id);
+        const classStr = img.classes.map(c => `<span class="meta-class">${c}</span>`).join(' ');
+        const isCloud = cloudStatus[img.id] !== undefined;
+        html += `
+          <div class="img-item ${isSelected?'selected':''}" data-id="${img.id}">
+            <div class="img-wrapper">
+              <img src="${img.src}" alt="${img.chapter}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23151e33%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%22 y=%22100%22 fill=%22%236b7fa0%22 font-size=%2214%22%3E🌙 broken%3C/text%3E%3C/svg%3E'" />
+              <div class="img-actions">
+                <button class="btn btn-sm fs-btn" data-id="${img.id}"><i class="fas fa-expand"></i></button>
+                <button class="btn btn-sm btn-primary edit-btn" data-id="${img.id}"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger delete-btn" data-id="${img.id}"><i class="fas fa-trash"></i></button>
+                ${!isCloud ? `<button class="btn btn-sm btn-warning upload-btn" data-id="${img.id}"><i class="fas fa-cloud-upload-alt"></i></button>` : ''}
+              </div>
+            </div>
+            <div class="img-meta">
+              <div class="meta-row">
+                <span class="meta-tag"><i class="fas fa-book"></i> ${img.chapter}</span>
+                <span class="meta-tag"><i class="fas fa-code-branch"></i> ${img.subSource}</span>
+                <span style="font-size:0.5rem; opacity:0.2; margin-left:auto;">${img.id.slice(0,8)}</span>
+              </div>
+            </div>
+            <input class="note-input" type="text" placeholder="✏️ note..." value="${img.note||''}" data-id="${img.id}">
+            <div style="display:flex; gap:3px; margin-top:2px;">
+              <label style="margin-left:auto; display:flex; align-items:center; gap:3px; font-size:0.65rem;">
+                <input type="checkbox" class="select-checkbox" data-id="${img.id}" ${isSelected?'checked':''}> select
+              </label>
+            </div>
+          </div>
+        `;
+      });
+      grid.innerHTML = html;
+
+      // Event listeners
+      document.querySelectorAll('.fs-btn').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = el.dataset.id;
+          const img = images.find(i => i.id === id);
+          if (img) openFullscreen(img);
+        });
+      });
+      
+      document.querySelectorAll('.img-item').forEach(el => {
+        el.addEventListener('click', (e) => {
+          if (e.target.closest('button') || e.target.closest('input') || e.target.closest('label')) return;
+          const id = el.dataset.id;
+          const img = images.find(i => i.id === id);
+          if (img) openFullscreen(img);
+        });
+      });
+
+      document.querySelectorAll('.select-checkbox').forEach(el => {
+        el.addEventListener('change', (e) => {
+          const id = el.dataset.id;
+          if (el.checked) {
+            selectedIds.add(id);
+            el.closest('.img-item').classList.add('selected');
+          } else {
+            selectedIds.delete(id);
+            el.closest('.img-item').classList.remove('selected');
+          }
+        });
+      });
+
+      document.querySelectorAll('.note-input').forEach(el => {
+        el.addEventListener('change', (e) => {
+          const id = el.dataset.id;
+          const note = el.value;
+          const img = images.find(i => i.id === id);
+          if (img) { 
+            img.note = note; 
+            updateStatus(id);
+            saveLocal();
+          }
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = el.dataset.id;
+          if (confirm('Delete this image?')) {
+            images = images.filter(i => i.id !== id);
+            delete localStatus[id];
+            selectedIds.delete(id);
+            saveLocal();
+            updateSyncStatus();
+            render();
+            updateFilters();
+            updateDatalists();
+            if (statusPanelVisible) renderStatusPanel();
+          }
+        });
+      });
+
+      document.querySelectorAll('.edit-btn').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = el.dataset.id;
+          const img = images.find(i => i.id === id);
+          if (img) editImage(img);
+        });
+      });
+
+      document.querySelectorAll('.upload-btn').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = el.dataset.id;
+          uploadSingle(id);
+        });
+      });
+
+      updateFilters();
+      updateDatalists();
+    }
+
+    function editImage(img) {
+      const newSrc = prompt('Image URL:', img.src);
+      if (newSrc === null) return;
+      const newChapter = prompt('Chapter:', img.chapter);
+      if (newChapter === null) return;
+      const newSub = prompt('Sub-source:', img.subSource);
+      if (newSub === null) return;
+      const newClasses = prompt('Classes (class:value, class:value):', classesToString(img.classes));
+      if (newClasses === null) return;
+      const newNote = prompt('Note:', img.note || '');
+      if (newNote === null) return;
+      
+      img.src = newSrc || img.src;
+      img.chapter = newChapter || 'untitled';
+      img.subSource = newSub || 'unknown';
+      img.classes = parseClasses(newClasses);
+      img.note = newNote;
+      updateStatus(img.id);
+      saveLocal();
+      render();
+      if (statusPanelVisible) renderStatusPanel();
+    }
+
+    function openFullscreen(img) {
+      const overlay = document.getElementById('fullscreenOverlay');
+      document.getElementById('fullscreenImg').src = img.src;
+      const info = document.getElementById('fullscreenInfo');
+      info.innerHTML = `
+        <div class="title">${img.chapter}</div>
+        <div class="sub">${img.subSource}</div>
+        <div class="classes">${img.classes.map(c => `<span>${c}</span>`).join('')}</div>
+        ${img.note ? `<div class="note">📝 ${img.note}</div>` : ''}
+        <div class="id">ID: ${img.id} · v${localStatus[img.id] || 0}</div>
+      `;
+      overlay.classList.add('active');
+    }
+
+    document.getElementById('closeFsBtn').addEventListener('click', () => {
+      document.getElementById('fullscreenOverlay').classList.remove('active');
+    });
+    document.getElementById('fullscreenOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) document.getElementById('fullscreenOverlay').classList.remove('active');
+    });
+
+    function renderStatusPanel() {
+      const allIds = new Set([...Object.keys(localStatus), ...Object.keys(cloudStatus)]);
+      if (allIds.size === 0) {
+        statusPanel.innerHTML = '<div style="padding:1rem; text-align:center; opacity:0.5;">no images</div>';
+        return;
+      }
+      
+      let html = `<table>
+        <thead><tr><th>Preview</th><th>ID</th><th>Chapter</th><th>Local</th><th>Cloud</th><th>Actions</th></tr></thead><tbody>`;
+      
+      for (const id of allIds) {
+        const localVer = localStatus[id] ?? '-';
+        const cloudVer = cloudStatus[id] ?? '-';
+        const img = images.find(i => i.id === id);
+        const chapter = img ? img.chapter : 'deleted';
+        const src = img ? img.src : '';
+        const diff = (localVer !== cloudVer);
+        html += `<tr style="${diff ? 'background:rgba(219,176,92,0.08);' : ''}">
+          <td>${src ? `<img class="thumb" src="${src}" onclick="document.getElementById('fullscreenImg').src='${src}';document.getElementById('fullscreenOverlay').classList.add('active');" />` : '-'}</td>
+          <td><code style="font-size:0.6rem;">${id.slice(0,10)}...</code></td>
+          <td style="font-size:0.7rem;">${chapter}</td>
+          <td>${localVer}</td>
+          <td>${cloudVer}</td>
+          <td>
+            ${localVer !== '-' && cloudVer !== '-' && localVer > cloudVer ? `<button class="btn btn-sm btn-warning push-single" data-id="${id}">↑</button>` : ''}
+            ${localVer !== '-' && cloudVer !== '-' && localVer < cloudVer ? `<button class="btn btn-sm btn-primary pull-single" data-id="${id}">↓</button>` : ''}
+            ${localVer === '-' && cloudVer !== '-' ? `<button class="btn btn-sm btn-primary pull-single" data-id="${id}">↓</button>` : ''}
+            ${localVer !== '-' && cloudVer === '-' ? `<button class="btn btn-sm btn-warning push-single" data-id="${id}">↑</button>` : ''}
+            ${localVer !== '-' && cloudVer !== '-' && localVer === cloudVer ? `<span style="color:#58a086;">✓</span>` : ''}
+            <button class="btn btn-sm btn-danger delete-single" data-id="${id}">✕</button>
+          </td>
+        </tr>`;
+      }
+      
+      html += '</tbody></table>';
+      html += `<div style="padding:0.5rem 0; display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <button class="btn btn-sm btn-success" id="pushAllBtn"><i class="fas fa-cloud-upload-alt"></i> push all</button>
+        <button class="btn btn-sm btn-primary" id="pullAllBtn"><i class="fas fa-cloud-download-alt"></i> pull all</button>
+        <button class="btn btn-sm btn-danger" id="deleteAllBtn"><i class="fas fa-trash"></i> delete local</button>
+      </div>`;
+      
+      statusPanel.innerHTML = html;
+      
+      document.querySelectorAll('.push-single').forEach(el => {
+        el.addEventListener('click', () => pushSingle(el.dataset.id));
+      });
+      document.querySelectorAll('.pull-single').forEach(el => {
+        el.addEventListener('click', () => pullSingle(el.dataset.id));
+      });
+      document.querySelectorAll('.delete-single').forEach(el => {
+        el.addEventListener('click', () => deleteSingle(el.dataset.id));
+      });
+      
+      document.getElementById('pushAllBtn').addEventListener('click', pushAll);
+      document.getElementById('pullAllBtn').addEventListener('click', pullAll);
+      document.getElementById('deleteAllBtn').addEventListener('click', deleteAllLocal);
+    }
+
+    async function uploadSingle(id) {
+      if (!database || !currentUserHash) { alert('Please login first'); return; }
+      const ref = database.ref('user_data/' + currentUserHash);
+      const img = images.find(i => i.id === id);
+      if (!img) { alert('Image not found'); return; }
+      try {
+        await ref.child('images/' + id).set(img);
+        cloudStatus[id] = localStatus[id] || 0;
+        await ref.child('status').set(cloudStatus);
+        updateSyncStatus();
+        if (statusPanelVisible) renderStatusPanel();
+        alert('Uploaded to cloud');
+        render();
+      } catch(e) { alert('Error: '+e.message); }
+    }
+
+    async function pushSingle(id) {
+      if (!database || !currentUserHash) return;
+      const ref = database.ref('user_data/' + currentUserHash);
+      const img = images.find(i => i.id === id);
+      if (!img) { alert('Image not found'); return; }
+      try {
+        await ref.child('images/' + id).set(img);
+        cloudStatus[id] = localStatus[id];
+        await ref.child('status').set(cloudStatus);
+        updateSyncStatus();
+        if (statusPanelVisible) renderStatusPanel();
+      } catch(e) { alert('Error: '+e.message); }
+    }
+
+    async function pullSingle(id) {
+      if (!database || !currentUserHash) return;
+      const ref = database.ref('user_data/' + currentUserHash);
+      try {
+        const snap = await ref.child('images/' + id).once('value');
+        const imgData = snap.val();
+        if (imgData) {
+          const idx = images.findIndex(i => i.id === id);
+          if (idx >= 0) images[idx] = imgData;
+          else images.push(imgData);
+          localStatus[id] = cloudStatus[id];
+          saveLocal();
+          render();
+          updateSyncStatus();
+          if (statusPanelVisible) renderStatusPanel();
+        }
+      } catch(e) { alert('Error: '+e.message); }
+    }
+
+    async function deleteSingle(id) {
+      if (!database || !currentUserHash) return;
+      if (!confirm(`Delete image ${id.slice(0,8)}... from both local and cloud?`)) return;
+      const ref = database.ref('user_data/' + currentUserHash);
+      try {
+        await ref.child('images/' + id).remove();
+        delete cloudStatus[id];
+        await ref.child('status').set(cloudStatus);
+        images = images.filter(i => i.id !== id);
+        delete localStatus[id];
+        selectedIds.delete(id);
+        saveLocal();
+        render();
+        updateSyncStatus();
+        if (statusPanelVisible) renderStatusPanel();
+      } catch(e) { alert('Error: '+e.message); }
+    }
+
+    async function pushAll() {
+      if (!database || !currentUserHash) return;
+      const ref = database.ref('user_data/' + currentUserHash);
+      const toPush = Object.keys(localStatus).filter(id => localStatus[id] !== cloudStatus[id]);
+      if (toPush.length === 0) { alert('Nothing to push'); return; }
+      if (!confirm(`Push ${toPush.length} images?`)) return;
+      try {
+        for (const id of toPush) {
+          const img = images.find(i => i.id === id);
+          if (img) {
+            await ref.child('images/' + id).set(img);
+            cloudStatus[id] = localStatus[id];
+          }
+        }
+        await ref.child('status').set(cloudStatus);
+        updateSyncStatus();
+        if (statusPanelVisible) renderStatusPanel();
+        alert(`Pushed ${toPush.length} images`);
+      } catch(e) { alert('Error: '+e.message); }
+    }
+
+    async function pullAll() {
+      if (!database || !currentUserHash) return;
+      const ref = database.ref('user_data/' + currentUserHash);
+      const toPull = Object.keys(cloudStatus).filter(id => cloudStatus[id] !== localStatus[id]);
+      if (toPull.length === 0) { alert('Nothing to pull'); return; }
+      if (!confirm(`Pull ${toPull.length} images?`)) return;
+      try {
+        for (const id of toPull) {
+          const snap = await ref.child('images/' + id).once('value');
+          const imgData = snap.val();
+          if (imgData) {
+            const idx = images.findIndex(i => i.id === id);
+            if (idx >= 0) images[idx] = imgData;
+            else images.push(imgData);
+            localStatus[id] = cloudStatus[id];
+          }
+        }
+        saveLocal();
+        render();
+        updateSyncStatus();
+        if (statusPanelVisible) renderStatusPanel();
+        alert(`Pulled ${toPull.length} images`);
+      } catch(e) { alert('Error: '+e.message); }
+    }
+
+    async function deleteAllLocal() {
+      if (!confirm('Delete ALL local images? (Cloud will remain)')) return;
+      if (!confirm('Are you sure?')) return;
+      images = [];
+      localStatus = {};
+      selectedIds = new Set();
+      saveLocal();
+      render();
+      updateSyncStatus();
+      if (statusPanelVisible) renderStatusPanel();
+    }
+
+    function updateProfileUI() {
+      profileName.textContent = displayName;
+      if (profilePicUrl && profilePicUrl.length > 10) {
+        profilePic.src = profilePicUrl;
+      } else {
+        profilePic.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="72" height="72"%3E%3Crect fill="%231a2542" width="72" height="72"/%3E%3Ctext x="36" y="48" text-anchor="middle" fill="%235a6d9b" font-size="30"%3E👤%3C/text%3E%3C/svg%3E';
+      }
+      if (bgImageUrl && bgImageUrl.length > 10) {
+        bgImage.style.backgroundImage = `url(${bgImageUrl})`;
+      }
+      // Always save to localStorage
+      localStorage.setItem(STORAGE_PROFILE_KEY, JSON.stringify({ displayName, profilePicUrl, bgImageUrl }));
+    }
+
+    async function uploadProfile() {
+      if (!database || !currentUserHash) { alert('Please login first'); return; }
+      const ref = getUserRef();
+      if (!ref) return;
+      
+      const name = prompt('Display name:', displayName);
+      if (name === null) return;
+      displayName = name;
+      
+      const pic = prompt('Profile pic URL:', profilePicUrl);
+      if (pic === null) return;
+      profilePicUrl = pic;
+      
+      const bg = prompt('Background image URL:', bgImageUrl);
+      if (bg === null) return;
+      bgImageUrl = bg;
+      
+      try {
+        await ref.child('profile').set({ displayName, profilePicUrl, bgImageUrl });
+        updateProfileUI();
+        alert('Profile uploaded to cloud');
+      } catch(e) { alert('Error: '+e.message); }
+    }
+
+    async function loadProfile() {
+      if (!database || !currentUserHash) { alert('Please login first'); return; }
+      const ref = getUserRef();
+      if (!ref) return;
+      
+      try {
+        const snap = await ref.child('profile').once('value');
+        const data = snap.val();
+        if (data) {
+          displayName = data.displayName || displayName;
+          profilePicUrl = data.profilePicUrl || profilePicUrl;
+          bgImageUrl = data.bgImageUrl || bgImageUrl;
+          updateProfileUI();
+          alert('Profile loaded from cloud');
+        } else {
+          alert('No profile in cloud');
+        }
+      } catch(e) { alert('Error: '+e.message); }
+    }
+
+    function saveLocal() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
+      localStorage.setItem(STORAGE_STATUS_KEY, JSON.stringify(localStatus));
+      if (currentUserHash) {
+        localStorage.setItem(STORAGE_HASH_KEY, currentUserHash);
+        localStorage.setItem(STORAGE_USER_KEY, currentUsername);
+      }
+      // Always save profile to localStorage
+      localStorage.setItem(STORAGE_PROFILE_KEY, JSON.stringify({ displayName, profilePicUrl, bgImageUrl }));
+    }
+
+    function loadLocal() {
+      // Load profile first (always available)
+      const profileData = localStorage.getItem(STORAGE_PROFILE_KEY);
+      if (profileData) {
+        try {
+          const p = JSON.parse(profileData);
+          displayName = p.displayName || 'Guest';
+          profilePicUrl = p.profilePicUrl || '';
+          bgImageUrl = p.bgImageUrl || '';
+          updateProfileUI();
+        } catch(e) {}
+      }
+
+      const data = localStorage.getItem(STORAGE_KEY);
+      if (data) {
+        try { 
+          const parsed = JSON.parse(data);
+          images = Array.isArray(parsed) ? parsed : [];
+        } catch(e){ images = []; }
+      } else {
+        const id1 = generateId();
+        const id2 = generateId();
+        images = [
+          { id: id1, src: 'https://picsum.photos/seed/moon1/400/300', chapter: 'moonlight', subSource: 'gallery', classes: ['tone:blue', 'type:landscape'], note: '' },
+          { id: id2, src: 'https://picsum.photos/seed/stars2/400/300', chapter: 'stars', subSource: 'deepspace', classes: ['tone:gold', 'type:cosmic'], note: '' }
+        ];
+        localStatus = {};
+        localStatus[id1] = 0;
+        localStatus[id2] = 0;
+        saveLocal();
+      }
+      
+      const statusData = localStorage.getItem(STORAGE_STATUS_KEY);
+      if (statusData) {
+        try { localStatus = JSON.parse(statusData); } catch(e){ localStatus = {}; }
+      } else {
+        images.forEach(img => {
+          if (!localStatus[img.id]) localStatus[img.id] = 0;
+        });
+        saveLocal();
+      }
+
+      const savedHash = localStorage.getItem(STORAGE_HASH_KEY);
+      const savedUser = localStorage.getItem(STORAGE_USER_KEY);
+      if (savedHash && savedUser) {
+        currentUserHash = savedHash;
+        currentUsername = savedUser;
+        isLoggedIn = true;
+        loginStatus.textContent = '✅';
+        showLoggedIn();
+        // Load cloud status in background
+        if (database) {
+          loadCloudStatus();
+        }
+      }
+
+      updateSyncStatus();
+      updateFilters();
+      updateDatalists();
+    }
+
+    async function loadCloudStatus() {
+      if (!database || !currentUserHash) return;
+      const ref = database.ref('user_data/' + currentUserHash + '/status');
+      try {
+        const snap = await ref.once('value');
+        const data = snap.val();
+        if (data) {
+          cloudStatus = data;
+          updateSyncStatus();
+        }
+      } catch(e) { /* silent */ }
+    }
+
+    function showLoggedIn() {
+      loginArea.classList.add('login-hidden');
+      loggedInArea.classList.remove('login-hidden');
+      updateProfileUI();
+    }
+
+    function showLogin() {
+      loginArea.classList.remove('login-hidden');
+      loggedInArea.classList.add('login-hidden');
+      isLoggedIn = false;
+    }
+
+    function getUserRef() {
+      if (!database || !currentUserHash) return null;
+      return database.ref('user_data/' + currentUserHash);
+    }
+
+    async function pullFromCloud() {
+      if (!database) { alert('Firebase not configured'); return; }
+      if (!currentUserHash) { alert('Please login first'); return; }
+      const ref = getUserRef();
+      if (!ref) return;
+      
+      try {
+        const statusSnap = await ref.child('status').once('value');
+        const cloudStatusData = statusSnap.val() || {};
+        cloudStatus = cloudStatusData;
+        
+        const toDownload = [];
+        for (const [id, cloudVersion] of Object.entries(cloudStatus)) {
+          const localVersion = localStatus[id] || -1;
+          if (cloudVersion > localVersion) {
+            toDownload.push(id);
+          }
+        }
+        
+        for (const id of Object.keys(cloudStatus)) {
+          if (!localStatus[id]) toDownload.push(id);
+        }
+        
+        if (toDownload.length === 0) {
+          alert('Already up to date!');
+          return;
+        }
+        
+        if (!confirm(`📥 Download ${toDownload.length} images?`)) return;
+        
+        for (const id of toDownload) {
+          const imgSnap = await ref.child('images/' + id).once('value');
+          const imgData = imgSnap.val();
+          if (imgData) {
+            const existingIdx = images.findIndex(i => i.id === id);
+            if (existingIdx >= 0) {
+              images[existingIdx] = imgData;
+            } else {
+              images.push(imgData);
+            }
+            localStatus[id] = cloudStatus[id];
+          }
+        }
+        
+        saveLocal();
+        render();
+        updateSyncStatus();
+        if (statusPanelVisible) renderStatusPanel();
+        alert(`✅ Downloaded ${toDownload.length} images`);
+        
+      } catch(e) {
+        console.error('Pull error:', e);
+        alert('Pull error: '+e.message);
+      }
+    }
+
+    async function pushToCloud() {
+      if (!database) { alert('Firebase not configured'); return; }
+      if (!currentUserHash) { alert('Please login first'); return; }
+      const ref = getUserRef();
+      if (!ref) return;
+      
+      try {
+        const statusSnap = await ref.child('status').once('value');
+        const cloudStatusData = statusSnap.val() || {};
+        cloudStatus = cloudStatusData;
+        
+        const toPush = [];
+        for (const [id, localVersion] of Object.entries(localStatus)) {
+          const cloudVersion = cloudStatus[id] || -1;
+          if (localVersion > cloudVersion) {
+            toPush.push(id);
+          }
+        }
+        
+        if (toPush.length === 0) {
+          alert('Already up to date!');
+          return;
+        }
+        
+        if (!confirm(`📤 Upload ${toPush.length} images?`)) return;
+        
+        for (const id of toPush) {
+          const img = images.find(i => i.id === id);
+          if (img) {
+            await ref.child('images/' + id).set(img);
+            cloudStatus[id] = localStatus[id];
+          }
+        }
+        
+        await ref.child('status').set(cloudStatus);
+        saveLocal();
+        updateSyncStatus();
+        if (statusPanelVisible) renderStatusPanel();
+        alert(`✅ Uploaded ${toPush.length} images`);
+        
+      } catch(e) {
+        console.error('Push error:', e);
+        alert('Push error: '+e.message);
+      }
+    }
+
+    async function login(username, password) {
+      const hashKey = secureHash(username, password);
+      
+      if (!database) {
+        currentUserHash = hashKey;
+        currentUsername = username;
+        isLoggedIn = true;
+        loginStatus.textContent = '✅ (local)';
+        localStorage.setItem(STORAGE_HASH_KEY, hashKey);
+        localStorage.setItem(STORAGE_USER_KEY, username);
+        showLoggedIn();
+        return true;
+      }
+
+      try {
+        const ref = database.ref('user_data/' + hashKey);
+        const snap = await ref.once('value');
+        if (snap.exists()) {
+          currentUserHash = hashKey;
+          currentUsername = username;
+          isLoggedIn = true;
+          loginStatus.textContent = '✅';
+          localStorage.setItem(STORAGE_HASH_KEY, hashKey);
+          localStorage.setItem(STORAGE_USER_KEY, username);
+          showLoggedIn();
+          
+          const data = snap.val();
+          if (data && data.status) {
+            cloudStatus = data.status;
+          }
+          if (data && data.images) {
+            if (images.length === 0) {
+              const imageData = data.images;
+              if (Array.isArray(imageData)) {
+                images = imageData;
+              } else if (typeof imageData === 'object') {
+                images = Object.values(imageData);
+              }
+              for (const img of images) {
+                if (!localStatus[img.id]) {
+                  localStatus[img.id] = cloudStatus[img.id] || 0;
+                }
+              }
+              saveLocal();
+              render();
+            }
+          }
+          if (data && data.profile) {
+            displayName = data.profile.displayName || displayName;
+            profilePicUrl = data.profile.profilePicUrl || profilePicUrl;
+            bgImageUrl = data.profile.bgImageUrl || bgImageUrl;
+            updateProfileUI();
+          }
+          updateSyncStatus();
+          return true;
+        } else {
+          loginStatus.textContent = '❌';
+          return false;
+        }
+      } catch(e) {
+        alert('Login error: '+e.message);
+        return false;
+      }
+    }
+
+    function logout() {
+      currentUserHash = null;
+      currentUsername = '';
+      isLoggedIn = false;
+      localStorage.removeItem(STORAGE_HASH_KEY);
+      localStorage.removeItem(STORAGE_USER_KEY);
+      loginStatus.textContent = '🔒';
+      showLogin();
+      cloudStatus = {};
+      updateSyncStatus();
+      statusPanel.style.display = 'none';
+      statusPanelVisible = false;
+    }
+
+    loadLocal();
+    render();
+
+    // Event listeners
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const user = document.getElementById('usernameInput').value.trim();
+      const pass = document.getElementById('passwordInput').value.trim();
+      if (!user || !pass) {
+        alert('Please enter username and password');
+        return;
+      }
+      const ok = await login(user, pass);
+      if (ok) {
+        alert('Login successful!');
+      } else {
+        alert('Invalid credentials.');
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+
+    document.getElementById('addImageBtn').addEventListener('click', () => {
+      const src = document.getElementById('newSrc').value.trim();
+      const customId = document.getElementById('newId').value.trim();
+      const chapter = document.getElementById('newChapter').value.trim() || 'untitled';
+      const sub = document.getElementById('newSub').value.trim() || 'unknown';
+      const cls = document.getElementById('newClass').value.trim();
+      const val = document.getElementById('newValue').value.trim();
+      
+      if (!src) { alert('Image src required'); return; }
+      
+      let classes = [];
+      if (cls && val) {
+        classes = [`${cls}:${val}`];
+      } else if (cls && !val) {
+        classes = [cls];
+      }
+      
+      const id = customId || generateId();
+      if (images.some(i => i.id === id)) {
+        alert('Image ID already exists. Please use a unique ID.');
+        return;
+      }
+      
+      const img = {
+        id: id,
+        src: src,
+        chapter: chapter,
+        subSource: sub,
+        classes: classes,
+        note: ''
+      };
+      images.push(img);
+      updateStatus(img.id);
+      saveLocal();
+      render();
+      if (statusPanelVisible) renderStatusPanel();
+      document.getElementById('newSrc').value = '';
+      document.getElementById('newId').value = '';
+      document.getElementById('newChapter').value = '';
+      document.getElementById('newSub').value = '';
+      document.getElementById('newClass').value = '';
+      document.getElementById('newValue').value = '';
+    });
+
+    document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+      filterChapter.value = '';
+      filterSub.value = '';
+      filterClass.value = '';
+      filterValue.value = '';
+      render();
+    });
+
+    [filterChapter, filterSub, filterClass, filterValue].forEach(el => {
+      el.addEventListener('change', render);
+    });
+
+    document.getElementById('pullCloudBtn').addEventListener('click', pullFromCloud);
+    document.getElementById('pushCloudBtn').addEventListener('click', pushToCloud);
+    document.getElementById('uploadProfileBtn').addEventListener('click', uploadProfile);
+    document.getElementById('loadProfileBtn').addEventListener('click', loadProfile);
+
+    document.getElementById('viewStatusBtn').addEventListener('click', () => {
+      statusPanelVisible = !statusPanelVisible;
+      statusPanel.style.display = statusPanelVisible ? 'block' : 'none';
+      if (statusPanelVisible) renderStatusPanel();
+    });
+
+    document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('loginBtn').click();
+    });
+
+    if (isLoggedIn) {
+      showLoggedIn();
+    }
+
+  })();
+</script>
+</body>
+</html>
