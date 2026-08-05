@@ -546,6 +546,15 @@
 </div>
 
 <script>
+  function getDirectDriveLink(url) {
+    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+
+    if (match) {
+        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+
+    return url;
+  }
   (function(){
     const firebaseConfig = {
     apiKey: "AIzaSyB_UAmL9fioe4zOkSzT1m-ghdzdzDH_bls",
@@ -900,7 +909,7 @@
     }
 
     function editImage(img) {
-      const newSrc = prompt('Image URL:', img.src);
+      const newSrc = getDirectDriveLink(prompt('Image URL:', img.src));
       if (newSrc === null) return;
       const newChapter = prompt('Chapter:', img.chapter);
       if (newChapter === null) return;
@@ -1489,7 +1498,7 @@
     document.getElementById('logoutBtn').addEventListener('click', logout);
 
     document.getElementById('addImageBtn').addEventListener('click', () => {
-      const src = document.getElementById('newSrc').value.trim();
+      const src = getDirectDriveLink(document.getElementById('newSrc').value.trim());
       const customId = document.getElementById('newId').value.trim();
       const chapter = document.getElementById('newChapter').value.trim() || 'untitled';
       const sub = document.getElementById('newSub').value.trim() || 'unknown';
